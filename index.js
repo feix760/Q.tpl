@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var $ = require('cheerio');
 var mTpl = require('micro-tpl');
+var parse = require('./parse');
 
 var DEFAULT = {
     prefix: 'q-',
@@ -32,8 +33,8 @@ function genStringsFactory(factory) {
     };
 }
 
-function filterExp(exp) {
-    return '__filterValue(this, "' + exp + '")';
+function filterExp(item) {
+    return '__filterValue(this, ' + JSON.stringify(item) + ')';
 }
 
 /*
@@ -54,16 +55,15 @@ exports.tplCode = function(str, options) {
                     return true;
             }).forEach(function(key) {
                 var name = key.substring(prefix.length)
-                    , match = ele.attribs[key].match(/^((\S*)\s*:)?([\s\S]*)$/)
                     , directive = directives[name];
-                if (directive && match) {
-                    var exp = filterExp(match[3].trim())
-                        , arg = match[2] || null;
-                    (directive.update || directive).call({
-                        el: ele,
-                        arg: arg,
-                        strings: stringsFactory
-                    }, exp, arg);
+                if (directive) {
+                    parse(ele.attribs[key]).forEach(function(item) {
+                        (directive.update || directive).call({
+                            el: ele,
+                            arg: item.arg,
+                            strings: stringsFactory
+                        }, filterExp(item));
+                    });
                 }
             });
     }, dom);

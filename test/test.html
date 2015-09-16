@@ -1,6 +1,7 @@
 <div>
     <div q-repeat="list | getList">
-        <div q-text="name" q-show="isShow" q-class="red: isRed"></div>
+        <div q-text="name" q-show="isShow" 
+            q-class="red: isRed, bold: size | isBold"></div>
         <input type="text" q-value="value" />
         <input type="checkbox" q-value="value" />
         <img src="" alt="" q-src="imgSrc" />
