@@ -35,7 +35,7 @@ module.exports = {
         }
     },
     value: function(exp) {
-        if (this.el.type === 'checkbox') {
+        if ($(this.el).attr('type') === 'checkbox') {
             $(this.el).attr('checked', eq(exp));
         } else {
             $(this.el).val(eq(exp));

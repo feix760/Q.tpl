@@ -53,7 +53,7 @@ exports.tplCode = function(str, options) {
                     , match = ele.attribs[key].match(/^((\S*)\s*:)?([\s\S]*)$/)
                     , directive = directives[name];
                 if (directive && match) {
-                    var exp = '_filterValue(this, "' + match[3] + '")'
+                    var exp = '__filterValue(this, "' + match[3].trim() + '")'
                         , arg = match[2] || null;
                     (directive.update || directive).call({
                         el: ele,
