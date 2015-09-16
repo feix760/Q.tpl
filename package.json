@@ -1,0 +1,28 @@
+{
+  "name": "q.tpl",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "micro-tpl": "^0.4.0",
+    "lodash": "^3.10.1",
+    "cheerio": "^0.19.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/miniflycn/dom.tpl.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miniflycn/dom.tpl/issues"
+  },
+  "homepage": "https://github.com/miniflycn/dom.tpl"
+}
