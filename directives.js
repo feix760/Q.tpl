@@ -9,6 +9,14 @@ function tmp(exp) {
     return 'var tmp = ' + exp + ';';
 }
 
+function styleTpl(self, tpl) {
+    $(self.el).css(self.strings(tpl), 0);
+}
+
+function attrTpl(self, tpl) {
+    $(self.el).attr(self.strings(tpl), 0);
+}
+
 module.exports = {
     text: function(exp) {
         $(this.el).html(eq(exp));
@@ -23,7 +31,7 @@ module.exports = {
     //},
     show: function (exp) {
         var tpl = '{{ if (' + exp + ') { }} display: block; {{ } }}';
-        $(this.el).css(this.strings(tpl), 0);
+        styleTpl(this, tpl);
     },
     'class': function(exp) {
         var arg = this.arg;
@@ -58,7 +66,7 @@ module.exports = {
                     '}',
                 ' }}'
             ].join('');
-            $(this.el).attr(this.strings(tpl), 0);
+            attrTpl(this, tpl);
         }
     },
     src: function(exp) {

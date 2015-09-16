@@ -32,6 +32,10 @@ function genStringsFactory(factory) {
     };
 }
 
+function filterExp(exp) {
+    return '__filterValue(this, "' + exp + '")';
+}
+
 /*
  * options.directives
  **/
@@ -53,7 +57,7 @@ exports.tplCode = function(str, options) {
                     , match = ele.attribs[key].match(/^((\S*)\s*:)?([\s\S]*)$/)
                     , directive = directives[name];
                 if (directive && match) {
-                    var exp = '__filterValue(this, "' + match[3].trim() + '")'
+                    var exp = filterExp(match[3].trim())
                         , arg = match[2] || null;
                     (directive.update || directive).call({
                         el: ele,
