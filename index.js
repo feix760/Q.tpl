@@ -1,11 +1,7 @@
 var _ = require('lodash');
 var $ = require('cheerio');
 var parse = require('./parse');
-
-var DEFAULT = {
-    prefix: 'q-',
-    directives: require('./directives')
-};
+var DEFAULT = require('./default');
 
 function walk(foo, elems) {
     var childs, elem, tmp;

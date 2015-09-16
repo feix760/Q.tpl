@@ -15,6 +15,7 @@ console.log(foo({
     isRed: true,
     pwd: '123456',
     isCheck: false,
+    size: 35,
     attrs: {
         width: 50,
         height: 100
