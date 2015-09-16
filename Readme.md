@@ -1,6 +1,6 @@
 
 ### test
 
-```shell
+```sh
 node test/test.js
 ```
