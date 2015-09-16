@@ -85,17 +85,16 @@ exports.tplCode = function(str, options) {
         .replace(/\}\}/g, '%>');
 };
 
-
 exports.compile = function(str, options) {
     options = options || {};
-    var filters = _.extend({}, options.filters || {}, DEFAULT.filters || {});
-    var tpl = exports.tplCode(str, options);
 
+    var filters = _.extend({}, options.filters || {}, DEFAULT.filters || {});
     function __filterValue(data, exp) {
         // TODO
         return data[exp.name];
     }
 
+    var tpl = exports.tplCode(str, options);
     var foo = _.template(tpl);
 
     return function(data) {
