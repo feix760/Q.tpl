@@ -1,5 +1,5 @@
 {
-  "name": "q.tpl",
+  "name": "Q.tpl",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -8,21 +8,14 @@
     "lodash": "^3.10.1",
     "cheerio": "^0.19.0"
   },
-  "devDependencies": {
-    "mocha": "*",
-    "should": "*"
-  },
-  "scripts": {
-    "test": "mocha"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/miniflycn/dom.tpl.git"
+    "url": "https://github.com/feix760/Q.tpl.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/miniflycn/dom.tpl/issues"
+    "url": "https://github.com/feix760/Q.tpl/issues"
   },
-  "homepage": "https://github.com/miniflycn/dom.tpl"
+  "homepage": "https://github.com/feix760/Q.tpl"
 }

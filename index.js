@@ -63,14 +63,19 @@ exports.tplCode = function(str, options) {
                 }
             });
     }, dom);
+
+    function tplstrings(str) {
+        var id = +str.match(/__tplstrings(\d+)/)[1];
+        return strings[id] !== 'undefined' ? strings[id] : str;
+    }
+
     return dom.toString()
         .replace(/\{\{[\s\S]*?\}\}/g, function(str) {
             return str.replace(/&quot;/g, '"');
         })
-        .replace(/__tplstrings(\d+)(\s*:\s*0;?)?/g, function(str) {
-            var id = +str.match(/__tplstrings(\d+)/)[1];
-            return strings[id] !== 'undefined' ? strings[id] : str;
-        })
+        .replace(/__tplstrings\d+\s?:\s?0;?/g, tplstrings) // style
+        .replace(/__tplstrings\d+="0"\s?/g, tplstrings) // attr
+        .replace(/__tplstrings\d+/g, tplstrings)
         .replace(/\{\{/g, '<%')
         .replace(/\}\}/g, '%>');
 };

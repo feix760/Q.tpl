@@ -23,6 +23,22 @@ module.exports = {
             var tpl = '{{ if (' + exp + ') { }} ' + arg + ' {{ } }}';
             $(this.el).addClass(this.strings(tpl));
         }
+    },
+    value: function(exp) {
+        if (this.el.type === 'checkbox') {
+            $(this.el).attr('checked', '{{= ' + exp + ' }}');
+        } else {
+            $(this.el).val('{{= ' + exp + ' }}');
+        }
+    },
+    attr: function(exp) {
+        var arg = this.arg;
+        if (arg) {
+            $(this.el).attr(arg, '{{= ' + exp + ' }}');
+        }
+    },
+    src: function(exp) {
+        $(this.el).attr('src', '{{= ' + exp + ' }}');
     }
 };
 
