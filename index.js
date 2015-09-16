@@ -34,7 +34,7 @@ function genStringsFactory(factory) {
 }
 
 function filterExp(item) {
-    return '__filterValue(this, ' + JSON.stringify(item) + ')';
+    return '__filterValue(__obj, ' + JSON.stringify(item) + ')';
 }
 
 /*
@@ -43,7 +43,8 @@ function filterExp(item) {
 exports.tplCode = function(str, options) {
     options = options || {};
     var dom = $(str)
-        , directives = _.extend({}, options.directives, DEFAULT.directives)
+        , directives = 
+            _.extend({}, options.directives || {}, DEFAULT.directives || {})
         , prefix = options.prefix || DEFAULT.prefix
         , strings = {}
         , stringsFactory = genStringsFactory(strings);
@@ -82,5 +83,27 @@ exports.tplCode = function(str, options) {
         .replace(/__tplstrings\d+/g, tplstrings)
         .replace(/\{\{/g, '<%')
         .replace(/\}\}/g, '%>');
+};
+
+
+exports.compile = function(str, options) {
+    options = options || {};
+    var filters = _.extend({}, options.filters || {}, DEFAULT.filters || {});
+    var tpl = exports.tplCode(str, options);
+
+    function __filterValue(data, exp) {
+        // TODO
+        return data[exp.name];
+    }
+
+    var foo = _.template(tpl);
+
+    return function(data) {
+        data = _.extend({}, data, {
+            __filterValue: __filterValue
+        });
+        data.__obj = data;
+        return foo(data);
+    };
 };
 

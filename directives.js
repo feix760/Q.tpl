@@ -30,13 +30,13 @@ module.exports = {
         //$(this.el).after('{{ });  }}');
     //},
     show: function (exp) {
-        var tpl = '{{ if (' + exp + ') { }} display: block; {{ } }}';
+        var tpl = '{{ if (' + exp + ') { }}display: block;{{ } }}';
         styleTpl(this, tpl);
     },
     'class': function(exp) {
         var arg = this.arg;
         if (arg) {
-            var tpl = '{{ if (' + exp + ') { }} ' + arg + ' {{ } }}';
+            var tpl = '{{ if (' + exp + ') { }}' + arg + '{{ } }}';
             $(this.el).addClass(this.strings(tpl));
         } else {
             $(this.el).addClass(this.strings(eq(exp)));
@@ -61,7 +61,7 @@ module.exports = {
                     tmp(exp),
                     'if (typeof tmp === "object" && tmp) {',
                         'for (var k in tmp) { }}',
-                            '{{= k }}={{= tmp[k] }} ',
+                            '{{= k }}="{{= tmp[k] }}" ',
                         '{{ } ',
                     '}',
                 ' }}'

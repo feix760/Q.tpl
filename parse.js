@@ -1,6 +1,7 @@
 
 function parse(exp) {
-    var all = exp.split(/,/).map(function(item) {
+    // TODO
+    return exp.split(/,/).map(function(item) {
         var match = item.match(/^(([^:]*):)?([^|]+)(\|[\s\S]*)?$/);
         return {
             arg: match[2] ? match[2].trim() : null,
@@ -12,8 +13,6 @@ function parse(exp) {
                 }) 
         };
     });
-    console.log(all);
-    return all;
 }
 
 module.exports = parse;
