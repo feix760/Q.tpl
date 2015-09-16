@@ -66,7 +66,7 @@ exports.tplCode = function(str, options) {
 
     function tplstrings(str) {
         var id = +str.match(/__tplstrings(\d+)/)[1];
-        return strings[id] !== 'undefined' ? strings[id] : str;
+        return typeof strings[id] !== 'undefined' ? strings[id] : str;
     }
 
     return dom.toString()
