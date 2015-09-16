@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var $ = require('cheerio');
-var mTpl = require('micro-tpl');
 var parse = require('./parse');
 
 var DEFAULT = {
