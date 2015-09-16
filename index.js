@@ -37,7 +37,7 @@ function genStringsFactory(factory) {
  **/
 exports.tplCode = function(str, options) {
     options = options || {};
-    var dom = $('<div>' + str + '</div>')
+    var dom = $(str)
         , directives = _.extend({}, options.directives, DEFAULT.directives)
         , prefix = options.prefix || DEFAULT.prefix
         , strings = {}
