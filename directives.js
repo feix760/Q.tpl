@@ -39,7 +39,9 @@ function styleToString(obj) {
 
 module.exports = {
     text: function(exp) {
-        // TODO it should use html encode for preventing XSS
+        $(this.el).html('{{- ' + exp + ' }}');
+    },
+    html: function(exp) {
         $(this.el).html(eq(exp));
     },
     //if: function(exp) {
