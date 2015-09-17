@@ -8,34 +8,42 @@ function compare(caseName) {
     tpl.tplCode(src).should.equal(expect);
 }
 
-describe('Q.tpl', function () {
-    it('should able to use text directive', function () {
-        compare('text');
+describe('directive', function () {
+    describe('text', function () {
+        it('should able to use text directive', function () {
+            compare('text');
+        });
+
+        it('should remove the text node', function () {
+            compare('text-has-text')
+        });
     });
+
+    describe('class', function () {
+        it('should able to use class directive', function () {
+            compare('class');
+        });
+
+        it('should remove the class when exists', function () {
+            compare('class-exist');
+        });
+
+        it('should able to use class directive without arugument', function () {
+            compare('class-without-arg');
+        });
+    });
+
+    describe('show', function () {
+        it('should able to use show directive', function () {
+            compare('show');
+        });
+
+        it('should remove the display style when using show directive', function () {
+            compare('show-has-style');
+        });
+    });
+    
+    // it('should able to use value directive', function () {
+    //     compare('value');
+    // });
 });
-
-
-// var fs = require('fs');
-// var tpl = require('../index');
-
-// var html = fs.readFileSync(__dirname + '/test.html').toString();
-
-// //var tplCode = tpl.tplCode(html);
-// //console.log(tplCode);
-
-// var foo = tpl.compile(html);
-
-// console.log(foo({
-//     isShow: true,
-//     imgSrc: 'http://www.baidu.com/logo.gif',
-//     isRed: true,
-//     pwd: '123456',
-//     isCheck: false,
-//     size: 35,
-//     attrs: {
-//         width: 50,
-//         height: 100
-//     }
-// }));
-
-

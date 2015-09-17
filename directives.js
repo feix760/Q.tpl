@@ -17,6 +17,26 @@ function attrTpl(self, tpl) {
     $(self.el).attr(self.strings(tpl), 0);
 }
 
+function styleParse(string) {
+    var res = {};
+    string.split(';').forEach(function (decl) {
+        // ignore just space
+        if (decl.trim()) {
+            decl = decl.split(':');
+            res[decl[0].trim()] = decl[1].trim();
+        }
+    });
+    return res;
+}
+
+function styleToString(obj) {
+    var res = [];
+    Object.keys(obj).forEach(function (key) {
+        res.push(key + ': ' + obj[key] + ';');
+    });
+    return res.join(' ');
+}
+
 module.exports = {
     text: function(exp) {
         $(this.el).html(eq(exp));
@@ -30,12 +50,22 @@ module.exports = {
         //$(this.el).after('{{ });  }}');
     //},
     show: function (exp) {
+        if (this.el.attribs.style) {
+            var obj = styleParse(this.el.attribs.style);
+            if ('display' in obj) {
+                delete obj['display'];
+            }
+            this.el.attribs.style = styleToString(obj);
+        }
         var tpl = '{{ if (' + exp + ') { }}display: block;{{ } }}';
         styleTpl(this, tpl);
     },
     'class': function(exp) {
         var arg = this.arg;
+        var $el = $(this.el);
         if (arg) {
+            // remove class prevent the target class has existed
+            $el.removeClass(arg);
             var tpl = '{{ if (' + exp + ') { }}' + arg + '{{ } }}';
             $(this.el).addClass(this.strings(tpl));
         } else {
