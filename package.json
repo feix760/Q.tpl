@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/feix760/Q.tpl/issues"
   },
-  "homepage": "https://github.com/feix760/Q.tpl"
+  "homepage": "https://github.com/feix760/Q.tpl",
+  "devDependencies": {
+    "should": "^7.1.0"
+  }
 }
