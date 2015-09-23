@@ -37,8 +37,7 @@ function filterExp(item) {
  **/
 function tplCode(options) {
     options = options || {};
-    var str = options.raw;
-    var dom = $(str)
+    var dom = $(options.raw)
         , directives = 
             _.extend({}, options.directives || {}, DEFAULT.directives || {})
         , prefix = options.prefix || DEFAULT.prefix
