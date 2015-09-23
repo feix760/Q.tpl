@@ -40,7 +40,8 @@ function styleToString(obj) {
 module.exports = {
     vm: function(exp) {
         var info = JSON.parse(exp.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-        $(this.el).html('{{= _vm["' + info.name + '"] }}');
+        $(this.el).html('{{= _vm[' + this.submodules.length + '] }}');
+        this.submodules.push(info.name);
     },
     text: function(exp) {
         $(this.el).html('{{- ' + exp + ' }}');

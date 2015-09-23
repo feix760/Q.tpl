@@ -35,8 +35,9 @@ function filterExp(item) {
 /*
  * options.directives
  **/
-function tplCode(str, options) {
+function tplCode(options) {
     options = options || {};
+    var str = options.raw;
     var dom = $(str)
         , directives = 
             _.extend({}, options.directives || {}, DEFAULT.directives || {})
@@ -58,7 +59,8 @@ function tplCode(str, options) {
                             (directive.update || directive).call({
                                 el: ele,
                                 arg: item.arg,
-                                strings: stringsFactory
+                                strings: stringsFactory,
+                                submodules: options.submodules
                             }, filterExp(item));
                         } catch(ex) {
                             console.warn('directive failed: ' + name);
@@ -84,8 +86,8 @@ function tplCode(str, options) {
         .replace(/\}\}/g, '%>');
 };
 
-exports.compile = function(str, options) {
-    options = options || {};
+exports.compile = function(options) {
+    options = _.extend({}, options || {});
 
     var filters = _.extend({}, options.filters || {}, DEFAULT.filters || {});
     function __filterValue(data, exp) {
@@ -105,10 +107,11 @@ exports.compile = function(str, options) {
         return root;
     }
 
-    var tpl = tplCode(str, options);
+    options.submodules = [];
+    var tpl = tplCode(options);
     var foo = _.template(tpl);
 
-    return function(data) {
+    var fun = function(data) {
         data = _.extend({}, data, {
             __filterValue: __filterValue,
             _vm: data._vm || {}
@@ -116,5 +119,7 @@ exports.compile = function(str, options) {
         data.__obj = data;
         return foo(data);
     };
+    fun.submodules = options.submodules;
+    return fun;
 };
 
