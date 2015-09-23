@@ -7,7 +7,16 @@ var html = fs.readFileSync(__dirname + '/test.html').toString();
 //var tplCode = tpl.tplCode(html);
 //console.log(tplCode);
 
-var foo = tpl.compile(html);
+var foo = tpl.compile(html, {
+    filters: {
+        insert: function(list, val) {
+            return [val].concat(list);
+        },
+        length: function(list) {
+            return list.length;
+        }
+    }
+});
 
 console.log(foo({
     isShow: true,
@@ -16,6 +25,10 @@ console.log(foo({
     pwd: '123456',
     isCheck: false,
     size: 35,
+    list: [23, 3, 22],
+    _vm: {
+        model2: '<h2>hello</h2>',
+    },
     attrs: {
         width: 50,
         height: 100

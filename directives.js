@@ -38,6 +38,10 @@ function styleToString(obj) {
 }
 
 module.exports = {
+    vm: function(exp) {
+        var info = JSON.parse(exp.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
+        $(this.el).html('{{= _vm["' + info.name + '"] }}');
+    },
     text: function(exp) {
         $(this.el).html('{{- ' + exp + ' }}');
     },

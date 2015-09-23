@@ -35,7 +35,7 @@ function filterExp(item) {
 /*
  * options.directives
  **/
-exports.tplCode = function(str, options) {
+function tplCode(str, options) {
     options = options || {};
     var dom = $(str)
         , directives = 
@@ -54,11 +54,15 @@ exports.tplCode = function(str, options) {
                     , directive = directives[name];
                 if (directive) {
                     parse(ele.attribs[key]).forEach(function(item) {
-                        (directive.update || directive).call({
-                            el: ele,
-                            arg: item.arg,
-                            strings: stringsFactory
-                        }, filterExp(item));
+                        try {
+                            (directive.update || directive).call({
+                                el: ele,
+                                arg: item.arg,
+                                strings: stringsFactory
+                            }, filterExp(item));
+                        } catch(ex) {
+                            console.warn('directive failed: ' + name);
+                        }
                     });
                 }
             });
@@ -85,16 +89,29 @@ exports.compile = function(str, options) {
 
     var filters = _.extend({}, options.filters || {}, DEFAULT.filters || {});
     function __filterValue(data, exp) {
-        // TODO
-        return data[exp.name];
+        var root = data[exp.name];
+        var name, args;
+        for (var i = 0; i < exp.filters.length; i++) {
+            try {
+                name = exp.filters[i][0];
+                args = [].concat(exp.filters[i]);
+                args[0] = root;
+                root = filters[name].apply(data, args);
+            } catch(ex) {
+                console.warn('filter failed: ' + name);
+                return root;
+            }
+        }
+        return root;
     }
 
-    var tpl = exports.tplCode(str, options);
+    var tpl = tplCode(str, options);
     var foo = _.template(tpl);
 
     return function(data) {
         data = _.extend({}, data, {
-            __filterValue: __filterValue
+            __filterValue: __filterValue,
+            _vm: data._vm || {}
         });
         data.__obj = data;
         return foo(data);
