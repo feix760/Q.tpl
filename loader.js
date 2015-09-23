@@ -21,10 +21,10 @@ function _sendRequrest(q, loader) {
 }
 
 // 后序遍历渲染
-function _transfer(q, datas, loader) {
+function _transfer(q, datas) {
     if (q.submodules.length) {
         var submodules = q.submodules.map(function(item, i) {
-            return _transfer(item, datas.submodules[i], loader);
+            return _transfer(item, datas.submodules[i]);
         });
         return Promise.all(submodules).then(function(submodules) {
             return datas.then(function(data) {
@@ -44,7 +44,7 @@ exports.compile = function(options) {
     var q = _compile(options.root, options.getQ);
     return function(loader) {
         var datas = _sendRequrest(q, loader);
-        return _transfer(q, datas, loader);
+        return _transfer(q, datas);
     }
 };
 
