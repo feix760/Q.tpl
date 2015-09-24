@@ -1,4 +1,10 @@
 
+### install
+
+```sh
+npm install q-tpl
+```
+
 ### test
 
 ```sh

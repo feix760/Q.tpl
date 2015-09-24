@@ -5,6 +5,7 @@ var QLoader = require('../loader');
 
 var q = QLoader.compile({
     root: 'root',
+    // compile invoke
     getQ: function(id) {
         if (id === 'submodule') {
             return {
