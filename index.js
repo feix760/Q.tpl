@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var $ = require('cheerio');
+var tags = require('./tags');
 var parse = require('./parse');
 var DEFAULT = require('./default');
 
@@ -9,12 +10,8 @@ function walk(foo, elems) {
         elem = elems[i];
         if (elem.type === 'tag') {
             childs = [].concat(elem.children);
-            if (!foo(elem)) {
-                childs &&
-                    walk(foo, childs);
-            } else {
-                childs &&
-                    walk(function() {}, childs);
+            if (foo(elem) !== false && childs.length) {
+                walk(foo, childs);
             }
         }
     }
@@ -45,6 +42,16 @@ function tplCode(options) {
         , stringsFactory = genStringsFactory(strings);
     walk(function(ele) {
         var attribs = Object.keys(ele.attribs);
+        if (tags.isCustom(ele.name)) {
+            var index = options.submodules.length;
+            options.submodules.push({
+                index: index,
+                attribs: ele.attribs,
+                name: ele.name
+            });
+            $(ele).replaceWith('{{= __getVm(' + index + ') }}');
+            return false;
+        }
         attribs
             .filter(function(key) {
                 if (key.indexOf(prefix) === 0)
@@ -113,7 +120,9 @@ exports.compile = function(options) {
     var fun = function(data) {
         data = _.extend({}, data, {
             __filterValue: __filterValue,
-            _vm: data._vm || {}
+            __getVm: function(index) {
+                return data._vm && data._vm[index] || '';
+            }
         });
         data.__obj = data;
         return foo(data);

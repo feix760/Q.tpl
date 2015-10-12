@@ -65,7 +65,7 @@ module.exports = {
             }
             this.el.attribs.style = styleToString(obj);
         }
-        var tpl = '{{ if (' + exp + ') { }}display: block;{{ } }}';
+        var tpl = '{{ if (' + exp + ') { }}display: block;{{ } else { }}display: none;{{ } }}';
         styleTpl(this, tpl);
     },
     'class': function(exp) {

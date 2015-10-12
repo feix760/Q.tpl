@@ -2,8 +2,16 @@ var _ = require('lodash');
 var Promise = require('promise');
 var Qtpl = require('./index');
 
-function _compile(id, getQ) {
-    var q = getQ(id);
+function _compile(vm, getQ) {
+    var q = vm._isVm ? vm : getQ(vm);
+    if (!q) {
+        console.warn('could not get Q: ' + JSON.stringify(vm));
+        return {
+            submodules: [],
+            tpl: function() {return ''}
+        };
+    }
+
     q.tpl = Qtpl.compile(q);
     q.submodules = q.tpl.submodules.map(function(item) {
         return _compile(item, getQ);
@@ -15,6 +23,7 @@ function _compile(id, getQ) {
 function _sendRequrest(q, loader) {
     var datas = q.data ? q.data(loader) : Promise.resolve({});
     datas.submodules = q.submodules.map(function(item) {
+        // 可以通过loader共享数据
         return _sendRequrest(item, loader);
     });
     return datas;
@@ -41,7 +50,10 @@ function _transfer(q, datas) {
 
 exports.compile = function(options) {
     options = options || {};
-    var q = _compile(options.root, options.getQ);
+    if (options.root && typeof options.root === 'object') {
+        options.root._isVm = true;
+    }
+    var q = _compile(options.root || null, options.getQ);
     return function(loader) {
         var datas = _sendRequrest(q, loader);
         return _transfer(q, datas);
