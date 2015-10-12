@@ -1,7 +1,9 @@
 
+var fs = require('fs');
 var _ = require('lodash');
 var Promise = require('promise');
 var utils = require('./utils');
+var tplLoader = require('./loader');
 
 function findHtml(root, vm) {
     root = root.replace(/\/?$/, '/');
@@ -62,7 +64,7 @@ function findJs(root, vm) {
     return !configQ && !guessQ ? null : resultQ;
 }
 
-exports.find = function(root, vm) {
+function findVm(root, vm) {
     var html = findHtml(root, vm);
     var js = findJs(root, vm);
     if (html && js) {
@@ -75,5 +77,39 @@ exports.find = function(root, vm) {
     } else {
         return null;
     } 
+};
+
+exports.compile = function(options) {
+    var name = options.name;
+    var root = options.root.replace(/\/?$/, '/');
+
+    var vm = {
+        raw: utils.readFile(root + name + '.html')
+    };
+    var vmFile = utils.readFile(root + 'pages/' + name + '/sync.js');
+    if (vmFile) {
+        _.extend(vm, utils.load(vmFile) || {});
+    }
+    return tplLoader.compile({
+        root: vm,
+        getQ: function(vm) {
+            return findVm(root + '/components', vm);
+        }
+    });
+};
+
+exports.compileAll = function(options) {
+    var root = options.root.replace(/\/?$/, '/');
+    var list = fs.readdirSync(root);
+    var all = {};
+    _.each(list, function(file) {
+        if (file.match(/([^\/\\]*)\.html$/)) {
+            var name = RegExp.$1;
+            all[name] = exports.compile(_.extend({}, options, {
+                name: name
+            }));
+        }
+    });
+    return all;
 };
 
