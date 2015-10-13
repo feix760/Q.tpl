@@ -131,6 +131,7 @@ exports.compile = function(options) {
                 if (!options.isRoot) {
                     html = html.replace(/>/, ' q-vm="' + options.submodules[index].name + '">');
                 } else {
+                    // TODO
                     html = html.replace(/(class=")/, '$1component-' + (index + 1) + ' ');
                 }
                 return html;
