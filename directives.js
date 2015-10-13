@@ -2,7 +2,7 @@
 var $ = require('cheerio');
 
 function eq(exp) {
-    return '{{= ' + exp + ' }}';
+    return '{%{= ' + exp + ' }%}';
 }
 
 function tmp(exp) {
@@ -40,23 +40,15 @@ function styleToString(obj) {
 module.exports = {
     vm: function(exp) {
         var info = JSON.parse(exp.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-        $(this.el).html('{{= _vm[' + this.submodules.length + '] }}');
+        $(this.el).html('{%{= _vm[' + this.submodules.length + '] }%}');
         this.submodules.push(info.name);
     },
     text: function(exp) {
-        $(this.el).html('{{- ' + exp + ' }}');
+        $(this.el).html('{%{- ' + exp + ' }%}');
     },
     html: function(exp) {
         $(this.el).html(eq(exp));
     },
-    //if: function(exp) {
-        //$(this.el).before('{{ if (' + exp + ') { }}');
-        //$(this.el).after('{{ } }}');
-    //},
-    //repeat: function(exp) {
-        //$(this.el).before('{{ _.each(' + exp + ', function(vm, k) {  }}');
-        //$(this.el).after('{{ });  }}');
-    //},
     show: function (exp) {
         if (this.el.attribs.style) {
             var obj = styleParse(this.el.attribs.style);
@@ -65,8 +57,23 @@ module.exports = {
             }
             this.el.attribs.style = styleToString(obj);
         }
-        var tpl = '{{ if (' + exp + ') { }}display: block;{{ } else { }}display: none;{{ } }}';
+        var tpl = '{%{ if (' + exp + ') { }%}display: block;{%{ } else { }%}display: none;{%{ } }%}';
         styleTpl(this, tpl);
+    },
+    repeat: function(exp) {
+        var $el = $(this.el);
+        $el.before($el.toString());
+        delete this.el.attribs['q-repeat'];
+        this.el.attribs['q-remove'] = '';
+        $el.before('{%{ var $$tmp = ' + exp + ';if($$tmp) { $$tmp.forEach(function(item) { with(item) { var __obj=item; }%}');
+        $el.after('{%{ }});} }%}');
+    },
+    bg: function(exp) {
+        var tpl = 'background: url(\'{%{= ' + exp + '}%}\')';
+        styleTpl(this, tpl);
+    },
+    remove: function() {
+        // do nothing
     },
     'class': function(exp) {
         var arg = this.arg;
@@ -74,7 +81,7 @@ module.exports = {
         if (arg) {
             // remove class prevent the target class has existed
             $el.removeClass(arg);
-            var tpl = '{{ if (' + exp + ') { }}' + arg + '{{ } }}';
+            var tpl = '{%{ if (' + exp + ') { }%}' + arg + '{%{ } }%}';
             $(this.el).addClass(this.strings(tpl));
         } else {
             $(this.el).addClass(this.strings(eq(exp)));
@@ -95,14 +102,14 @@ module.exports = {
             }
         } else {
             var tpl = [
-                '{{ ', 
+                '{%{ ', 
                     tmp(exp),
                     'if (typeof tmp === "object" && tmp) {',
-                        'for (var k in tmp) { }}',
-                            '{{= k }}="{{= tmp[k] }}" ',
-                        '{{ } ',
+                        'for (var k in tmp) { }%}',
+                            '{%{= k }%}="{%{= tmp[k] }%}" ',
+                        '{%{ } ',
                     '}',
-                ' }}'
+                ' }%}'
             ].join('');
             attrTpl(this, tpl);
         }

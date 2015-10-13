@@ -14,7 +14,6 @@ function findHtml(root, vm) {
 
     // replace $
     html = html.replace(/\$/g, vm.name);
-    // add attribs
     html = html.replace(/>/, ' ' + _.map(vm.attribs, function(v, k) {
         return k + '="' + v + '"';
     }).join(' ') + '>');
@@ -38,7 +37,8 @@ function findJs(root, vm) {
         data: {}
     }, guessQ || {});
 
-    var configQ = utils.load(utils.readFile(root + vm.name + '/sync.js'));
+    var configCode = utils.readFile(root + vm.name + '/sync.js');
+    var configQ = configCode ? utils.load(configCode) : null;
     if (configQ) {
         // set config
         _.extend(resultQ.filters, configQ.filters || {});

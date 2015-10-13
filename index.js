@@ -49,7 +49,7 @@ function tplCode(options) {
                 attribs: ele.attribs,
                 name: ele.name
             });
-            $(ele).replaceWith('{{= __getVm(' + index + ') }}');
+            $(ele).replaceWith('{%{= __getVm(' + index + ') }%}');
             return false;
         }
         attribs
@@ -82,14 +82,14 @@ function tplCode(options) {
     }
 
     return dom.toString()
-        .replace(/\{\{[\s\S]*?\}\}/g, function(str) {
+        .replace(/\{%\{[\s\S]*?\}%\}/g, function(str) {
             return str.replace(/&quot;/g, '"');
         })
         .replace(/__tplstrings\d+\s?:\s?0;?/g, tplstrings) // style
         .replace(/__tplstrings\d+="0"\s?/g, tplstrings) // attr
         .replace(/__tplstrings\d+/g, tplstrings)
-        .replace(/\{\{/g, '<%')
-        .replace(/\}\}/g, '%>');
+        .replace(/\{%\{/g, '<%')
+        .replace(/\}%\}/g, '%>');
 };
 
 exports.compile = function(options) {
@@ -115,17 +115,29 @@ exports.compile = function(options) {
 
     options.submodules = [];
     var tpl = tplCode(options);
+    //console.log(tpl);
     var foo = _.template(tpl);
 
     var fun = function(data) {
         data = _.extend({}, data, {
             __filterValue: __filterValue,
             __getVm: function(index) {
-                return data._vm && data._vm[index] || '';
+                var html = data._vm && data._vm[index] || '';
+                if (!options.isRoot) {
+                    html = html.replace(/>/, ' q-vm="' + options.submodules[index].name + '">');
+                } else {
+                    html = html.replace(/(class=")/, '$1component-' + (index + 1) + ' ');
+                }
+                return html;
             }
         });
         data.__obj = data;
-        return foo(data);
+        try {
+            return foo(data);
+        } catch (ex) {
+            console.warn('template error');
+            return '';
+        }
     };
     fun.submodules = options.submodules;
     return fun;

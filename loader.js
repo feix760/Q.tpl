@@ -2,7 +2,7 @@ var _ = require('lodash');
 var Promise = require('promise');
 var Qtpl = require('./index');
 
-function _compile(vm, getQ) {
+function _compile(vm, getQ, isRoot) {
     var q = vm._isVm ? vm : getQ(vm);
     if (!q) {
         console.warn('could not get Q: ' + JSON.stringify(vm));
@@ -12,6 +12,7 @@ function _compile(vm, getQ) {
         };
     }
 
+    q.isRoot = !!isRoot;
     q.tpl = Qtpl.compile(q);
     q.submodules = q.tpl.submodules.map(function(item) {
         return _compile(item, getQ);
@@ -53,7 +54,7 @@ exports.compile = function(options) {
     if (options.root && typeof options.root === 'object') {
         options.root._isVm = true;
     }
-    var q = _compile(options.root || null, options.getQ);
+    var q = _compile(options.root || null, options.getQ, true);
     return function(loader) {
         var datas = _sendRequrest(q, loader);
         return _transfer(q, datas);
