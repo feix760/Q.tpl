@@ -4,10 +4,8 @@ var tpl = require('../index');
 
 var html = fs.readFileSync(__dirname + '/test.html').toString();
 
-//var tplCode = tpl.tplCode(html);
-//console.log(tplCode);
-
-var foo = tpl.compile(html, {
+var foo = tpl.compile({
+    raw: html,
     filters: {
         insert: function(list, val) {
             return [val].concat(list);

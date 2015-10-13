@@ -4,6 +4,12 @@ var tags = require('./tags');
 var parse = require('./parse');
 var DEFAULT = require('./default');
 
+_.extend(_.templateSettings, {
+    evaluate: /\{%\{(.+?)\}%\}/g,
+    interpolate: /\{%\{=(.+?)\}%\}/g,
+    escape: /\{%\{-(.+?)\}%\}/g
+});
+
 function walk(foo, elems) {
     var childs, elem, tmp;
     for (var i = 0, j = elems.length; i < j; i++) {
@@ -87,10 +93,10 @@ function tplCode(options) {
         })
         .replace(/__tplstrings\d+\s?:\s?0;?/g, tplstrings) // style
         .replace(/__tplstrings\d+="0"\s?/g, tplstrings) // attr
-        .replace(/__tplstrings\d+/g, tplstrings)
-        .replace(/\{%\{/g, '<%')
-        .replace(/\}%\}/g, '%>');
+        .replace(/__tplstrings\d+/g, tplstrings);
 };
+
+exports.tplCode = tplCode;
 
 exports.compile = function(options) {
     options = _.extend({}, options || {});
@@ -115,7 +121,6 @@ exports.compile = function(options) {
 
     options.submodules = [];
     var tpl = tplCode(options);
-    //console.log(tpl);
     var foo = _.template(tpl);
 
     var fun = function(data) {
@@ -135,7 +140,7 @@ exports.compile = function(options) {
         try {
             return foo(data);
         } catch (ex) {
-            console.warn('template error');
+            console.warn('template error: ' + ex.toString());
             return '';
         }
     };

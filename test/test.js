@@ -5,7 +5,7 @@ var path = require('path');
 function compare(caseName) {
     var src = fs.readFileSync(path.join(__dirname, 'src', caseName + '.html'), 'utf-8');
     var expect = fs.readFileSync(path.join(__dirname, 'expect', caseName + '.html'), 'utf-8');
-    tpl.tplCode(src).should.equal(expect);
+    tpl.tplCode({raw: src}).should.equal(expect);
 }
 
 describe('directive', function () {
