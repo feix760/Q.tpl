@@ -32,20 +32,24 @@ function _sendRequrest(q, loader) {
 
 // 后序遍历渲染
 function _transfer(q, datas) {
+    function afterChildren(ext) {
+        return datas.then(function(data) {
+            return q.tpl(_.extend({}, data, ext || {}));
+        }, function() {
+            // 保准一定success
+            return Promise.resolve(q.tpl(_.extend({}, ext || {})));
+        });
+    }
     if (q.submodules.length) {
         var submodules = q.submodules.map(function(item, i) {
             return _transfer(item, datas.submodules[i]);
         });
+        // all(submodules) 不会fail
         return Promise.all(submodules).then(function(submodules) {
-            return datas.then(function(data) {
-                data = _.extend({}, data, {_vm: submodules});
-                return q.tpl(data);
-            });
+            return afterChildren({_vm: submodules});
         });
     } else {
-        return datas.then(function(data) {
-            return q.tpl(data);
-        });
+        return afterChildren();
     }
 }
 
