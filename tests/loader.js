@@ -34,7 +34,7 @@ var q = tplLoader.compile({
     // compile invoke
     getQ: function(vm) {
         return {
-            raw: '<h1 q-text="text"></h1>',
+            raw: '<div><h1 q-text="text"></h1><content></content></div>',
             data: function(loader) {
                 return Promise.resolve({
                     text: 'hello world submodule'

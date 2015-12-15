@@ -2,28 +2,31 @@ var _ = require('lodash');
 var Promise = require('promise');
 var Qtpl = require('./index');
 
-function _compile(vm, getQ, isRoot) {
-    var q = vm._isVm ? vm : getQ(vm);
-    if (!q) {
-        console.warn('could not get Q: ' + JSON.stringify(vm));
-        return {
-            submodules: [],
-            tpl: function() {return ''}
-        };
+function _compile(vmInfo, getQ) {
+    var vm = null;
+    if (vmInfo) {
+        vmInfo = typeof vmInfo === 'string' 
+            ? {name: vmInfo} : _.extend({}, vmInfo);
+        vmInfo = vmInfo.raw ? vmInfo : _.extend(vmInfo, getQ(vmInfo));
+        vm = Qtpl.compile(vmInfo).vm;
     }
 
-    q.isRoot = !!isRoot;
-    q.tpl = Qtpl.compile(q);
-    q.submodules = q.tpl.submodules.map(function(item) {
+    if (!vm) {
+        console.warn('could not get Q: ' + JSON.stringify(vmInfo));
+        return null;
+    }
+    vm.submodules = vm.submodules.map(function(item) {
         return _compile(item, getQ);
     });
-    return q;
+    return vm;
 }
 
 // 把所有的请求全发出去
-function _sendRequrest(q, loader) {
-    var datas = q.data ? q.data(loader) : Promise.resolve({});
-    datas.submodules = q.submodules.map(function(item) {
+function _sendRequrest(vm, loader) {
+    var datas = typeof vm.data === 'function' 
+        ? vm.data(loader) 
+        : Promise.resolve(vm.data || {});
+    datas.submodules = vm.submodules.map(function(item) {
         // 可以通过loader共享数据
         return _sendRequrest(item, loader);
     });
@@ -31,22 +34,28 @@ function _sendRequrest(q, loader) {
 }
 
 // 后序遍历渲染
-function _transfer(q, datas) {
-    function afterChildren(ext) {
+function _transfer(vm, datas) {
+    var subHtml = [];
+    function afterChildren() {
+        var tplData = {
+            __vm: vm.vmInfo,
+            __subHtml: subHtml
+        };
         return datas.then(function(data) {
-            return q.tpl(_.extend({}, data, ext || {}));
+            return vm.tplFun(_.extend(data, tplData));
         }, function() {
             // 保准一定success
-            return Promise.resolve(q.tpl(_.extend({}, ext || {})));
+            return Promise.resolve(vm.tplFun(tplData));
         });
     }
-    if (q.submodules.length) {
-        var submodules = q.submodules.map(function(item, i) {
+    if (vm.submodules.length) {
+        var submodules = vm.submodules.map(function(item, i) {
             return _transfer(item, datas.submodules[i]);
         });
         // all(submodules) 不会fail
-        return Promise.all(submodules).then(function(submodules) {
-            return afterChildren({_vm: submodules});
+        return Promise.all(submodules).then(function(htmlList) {
+            subHtml = htmlList;
+            return afterChildren();
         });
     } else {
         return afterChildren();
@@ -55,13 +64,13 @@ function _transfer(q, datas) {
 
 exports.compile = function(options) {
     options = options || {};
-    if (options.root && typeof options.root === 'object') {
-        options.root._isVm = true;
+    if (typeof options.root === 'object' && options.root) {
+        options.root.name = options.root.name || '_root';
     }
-    var q = _compile(options.root || null, options.getQ, true);
+    var vm = _compile(options.root || '_root', options.getQ);
     return function(loader) {
-        var datas = _sendRequrest(q, loader);
-        return _transfer(q, datas);
+        var datas = _sendRequrest(vm, loader);
+        return _transfer(vm, datas);
     }
 };
 

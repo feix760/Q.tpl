@@ -1,8 +1,9 @@
 var _ = require('lodash');
 var $ = require('cheerio');
-var tags = require('./tags');
-var parse = require('./parse');
-var DEFAULT = require('./default');
+var Vm = require('./lib/vm');
+var tags = require('./lib/tags');
+var parse = require('./lib/parse');
+var DEFAULT = require('./lib/default');
 
 _.extend(_.templateSettings, {
     evaluate: /\{%\{(.+?)\}%\}/g,
@@ -23,14 +24,6 @@ function walk(foo, elems) {
     }
 }
 
-function genStringsFactory(factory) {
-    var id = 0;
-    return function(str) {
-        factory[++id] = str;
-        return '__tplstrings' + id;
-    };
-}
-
 function filterExp(item) {
     return '__filterValue(__obj, ' + JSON.stringify(item) + ')';
 }
@@ -38,24 +31,22 @@ function filterExp(item) {
 /*
  * options.directives
  **/
-function tplCode(options) {
+function _compile(options) {
     options = options || {};
-    var dom = $(options.raw)
-        , directives = 
-            _.extend({}, options.directives || {}, DEFAULT.directives || {})
-        , prefix = options.prefix || DEFAULT.prefix
-        , strings = {}
-        , stringsFactory = genStringsFactory(strings);
+
+    var vm = new Vm(options),
+        prefix = options.prefix || DEFAULT.prefix;
+
     walk(function(ele) {
         var attribs = Object.keys(ele.attribs);
-        if (tags.isCustom(ele.name)) {
-            var index = options.submodules.length;
-            options.submodules.push({
-                index: index,
-                attribs: ele.attribs,
-                name: ele.name
-            });
-            $(ele).replaceWith('{%{= __getVm(' + index + ') }%}');
+        if (ele.name === 'content') {
+            $(ele).replaceWith('{%{= __vm.content }%}');
+        } else if (tags.isCustom(ele.name)) {
+            $(ele).replaceWith(vm.addSubmodule({
+                name: ele.name,
+                content: $(ele).html(),
+                attribs: ele.attribs
+            }));
             return false;
         }
         attribs
@@ -64,15 +55,14 @@ function tplCode(options) {
                     return true;
             }).forEach(function(key) {
                 var name = key.substring(prefix.length)
-                    , directive = directives[name];
+                    , directive = vm.directives[name];
                 if (directive) {
                     parse(ele.attribs[key]).forEach(function(item) {
                         try {
                             (directive.update || directive).call({
                                 el: ele,
                                 arg: item.arg,
-                                strings: stringsFactory,
-                                submodules: options.submodules
+                                vm: vm
                             }, filterExp(item));
                         } catch(ex) {
                             console.warn('directive failed: ' + name);
@@ -80,24 +70,47 @@ function tplCode(options) {
                     });
                 }
             });
-    }, dom);
+    }, vm.$el);
+
+    vm.$el
+        // add class component-x
+        .addClass(vm.stringsFactory(
+            '{%{= !__vm.parent ? "component-" + __vm.index : ""}%}'
+        ))
+        // add q-vm
+        .attr(vm.stringsFactory(
+            '{%{= __vm.parent && !__vm.inline ? "q-vm=" + __vm.name : "" }%}'
+        ));
 
     function tplstrings(str) {
         var id = +str.match(/__tplstrings(\d+)/)[1];
-        return typeof strings[id] !== 'undefined' ? strings[id] : str;
+        return vm.stringsFactory.value(id);
     }
 
-    return dom.toString()
+    // escape strings
+    vm.tpl = vm.$el.toString()
         .replace(/\{%\{[\s\S]*?\}%\}/g, function(str) {
             return str.replace(/&quot;/g, '"');
         })
         .replace(/__tplstrings\d+\s?:\s?0;?/g, tplstrings) // style
         .replace(/__tplstrings\d+="0"\s?/g, tplstrings) // attr
         .replace(/__tplstrings\d+/g, tplstrings);
+
+    delete vm.$el;
+    delete vm.stringsFactory;
+    delete vm.directives;
+    return vm;
 };
 
-exports.tplCode = tplCode;
-
+/**
+ * @param {Object} options
+ * {
+ *      filters: {},
+ *      directives: {},
+ *      raw: 'html',
+ *      parent: 'name'
+ * }
+ */
 exports.compile = function(options) {
     options = _.extend({}, options || {});
 
@@ -119,32 +132,27 @@ exports.compile = function(options) {
         return root;
     }
 
-    options.submodules = [];
-    var tpl = tplCode(options);
-    var foo = _.template(tpl);
-
+    var vm = _compile(options),
+        _fun = _.template(vm.tpl);
     var fun = function(data) {
         data = _.extend({}, data, {
+            __vm: data.__vm || {}, // 模块信息
             __filterValue: __filterValue,
             __getVm: function(index) {
-                var html = data._vm && data._vm[index] || '';
-                if (!options.isRoot) {
-                    html = html.replace(/>/, ' q-vm="' + options.submodules[index].name + '">');
-                } else {
-                    html = html.replace(/(class=")/, '$1component-' + (index + 1) + ' ');
-                }
-                return html;
+                return data.__subHtml && data.__subHtml[index] || '';
             }
         });
         data.__obj = data;
         try {
-            return foo(data);
+            return _fun(data);
         } catch (ex) {
             console.warn('template error: ' + ex.toString());
             return options.raw;
         }
     };
-    fun.submodules = options.submodules;
+
+    vm.tplFun = fun;
+    fun.vm = vm;
     return fun;
 };
 
