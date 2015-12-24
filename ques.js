@@ -102,8 +102,8 @@ exports.compile = function(options) {
  * export replaceholder function for fis-ques
  */
 exports.replaceholder = function (html, name) {
-    return html.replace(/\$__/, name + '__')
-        .replace(/\$__\$/, name);
+    return html.replace(/\$__/g, name + '__')
+        .replace(/\$__\$/g, name);
 };
 exports.compileAll = function(options) {
     var root = options.root.replace(/\/?$/, '/');
