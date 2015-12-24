@@ -13,7 +13,7 @@ function findHtml(root, vm) {
     }
 
     // replace $
-    html = html.replace(/\$__/g, vm.name + '_');
+    html = exports.replaceholder(html, vm.name);
     html = html.replace(/>/, ' ' + _.map(vm.attribs, function(v, k) {
         return k + '="' + v + '"';
     }).join(' ') + '>');
@@ -98,6 +98,13 @@ exports.compile = function(options) {
     });
 };
 
+/**
+ * export replaceholder function for fis-ques
+ */
+exports.replaceholder = function (html, name) {
+    return html.replace(/\$__/, name + '__')
+        .replace(/\$__\$/, name);
+};
 exports.compileAll = function(options) {
     var root = options.root.replace(/\/?$/, '/');
     var list = fs.readdirSync(root);
