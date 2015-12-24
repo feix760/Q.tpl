@@ -13,7 +13,7 @@ function findHtml(root, vm) {
     }
 
     // replace $
-    html = html.replace(/\$/g, vm.name);
+    html = html.replace(/\$__/g, vm.name + '_');
     html = html.replace(/>/, ' ' + _.map(vm.attribs, function(v, k) {
         return k + '="' + v + '"';
     }).join(' ') + '>');
