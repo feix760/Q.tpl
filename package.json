@@ -1,12 +1,11 @@
 {
   "name": "q-tpl",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "dependencies": {
     "lodash": "^3.10.1",
-    "cheerio": "^0.19.0",
-    "promise": "^7.0.4"
+    "cheerio": "^0.19.0"
   },
   "repository": {
     "type": "git",

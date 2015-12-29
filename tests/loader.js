@@ -1,7 +1,6 @@
 
 var _ = require('lodash');
 var fs = require('fs');
-var Promise = require('promise');
 var tplLoader = require('../loader');
 
 var q = tplLoader.compile({
@@ -45,7 +44,7 @@ var q = tplLoader.compile({
 });
 
 var loader = {};
-q(loader).done(function(html) {
+q(loader).then(function(html) {
     console.log(html);
 });
 

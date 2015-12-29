@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var Promise = require('promise');
 var Qtpl = require('./index');
 
 function _compile(vmInfo, getQ) {

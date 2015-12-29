@@ -75,7 +75,7 @@ function _compile(options) {
     vm.$el
         // add class component-x
         .addClass(vm.stringsFactory(
-            '{%{= !__vm.parent ? "component-" + __vm.index : ""}%}'
+            '{%{= !__vm.parent && !isNaN(__vm.index) ? "component-" + (__vm.index + 1) : ""}%}'
         ))
         // add q-vm
         .attr(vm.stringsFactory(

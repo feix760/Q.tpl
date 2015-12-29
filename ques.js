@@ -1,7 +1,6 @@
 
 var fs = require('fs');
 var _ = require('lodash');
-var Promise = require('promise');
 var utils = require('./lib/utils');
 var tplLoader = require('./loader');
 
