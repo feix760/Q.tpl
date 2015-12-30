@@ -5,7 +5,7 @@ var tplLoader = require('../loader');
 
 var q = tplLoader.compile({
     root: {
-        raw: fs.readFileSync(__dirname + '/test.html').toString(),
+        raw: fs.readFileSync(__dirname + '/loader.html').toString(),
         filters: {
             insert: function(list, val) {
                 return [val].concat(list);

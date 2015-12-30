@@ -47,19 +47,6 @@ function findJs(root, vm) {
 
     utils.wrapObjFuns(resultQ.filters);
 
-    var data = resultQ.data;
-    if (typeof data !== 'function') {
-        resultQ.data = function(loader) {
-            if (loader.global) {
-                return loader.global.then(function(global) {
-                    return _.extend({}, data, global);
-                });
-            } else {
-                return Promise.resolve(data);
-            }
-        };
-    }
-
     return !configQ && !guessQ ? null : resultQ;
 }
 

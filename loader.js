@@ -22,14 +22,51 @@ function _compile(vmInfo, getQ) {
 
 // 把所有的请求全发出去
 function _sendRequrest(vm, loader) {
-    var datas = typeof vm.data === 'function' 
-        ? vm.data(loader) 
-        : Promise.resolve(vm.data || {});
-    datas.submodules = vm.submodules.map(function(item) {
+    var data = getDataer(vm.data)(loader);
+    data.submodules = vm.submodules.map(function(item) {
         // 可以通过loader共享数据
         return _sendRequrest(item, loader);
     });
-    return datas;
+    return data;
+}
+
+/**
+ * 获取数据获取器
+ * @param {Object|function(Object):Object|function(Object):Promise} data
+ * @return {function(Object):Promise}
+ */
+function getDataer(data) {
+    return function(loader) {
+        var global = adaptedData(loader.global || {})(loader),
+            local = adaptedData(data || {})(loader);
+        return Promise.all([global, local])
+            .then(function(datas) {
+                // extend global
+                return _.extend({}, datas[0] || {}, datas[1] || {});
+            });
+    };
+}
+
+/**
+ * 适配数据
+ * @param {Object|function(Object):Object|function(Object):Promise} data
+ * @return {function(Object):Promise}
+ */
+function adaptedData(data) {
+    return function(loader) {
+        if (typeof data === 'function') {
+            data = data(loader);
+        } else {
+            data = new Promise(function(resolve, reject) {
+                resolve(data);
+            });
+        }
+        return data && typeof data.then === 'function'  // 判断是不是Promise
+            ? data
+            : new Promise(function(resolve, reject) {
+                resolve(data);
+            });
+    }
 }
 
 // 后序遍历渲染
