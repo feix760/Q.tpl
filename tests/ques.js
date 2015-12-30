@@ -13,7 +13,8 @@ var req = {
     global: function() {
         return new Promise(function(resolve, reject) {
             resolve({
-                globalTitle: 'global title ok.'
+                globalTitle: 'globalTitle from global',
+                syncTitle: 'syncTitle from global'
             });
         });
     }
@@ -28,7 +29,7 @@ page(req)
         console.log(err);
     });
 
-
+return;
 // 编译多个页面
 var allPages = ques.compileAll({
     root: __dirname + '/pages'
@@ -40,7 +41,8 @@ Object.keys(allPages).forEach(function(name) {
         global: function() {
             return new Promise(function(resolve, reject) {
                 resolve({
-                    globalTitle: 'global title ok.'
+                    globalTitle: 'globalTitle from global',
+                    syncTitle: 'syncTitle from global'
                 });
             });
         }

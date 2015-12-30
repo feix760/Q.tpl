@@ -22,7 +22,7 @@ function _compile(vmInfo, getQ) {
 
 // 把所有的请求全发出去
 function _sendRequrest(vm, loader) {
-    var data = getDataer(vm.data)(loader);
+    var data = mergeData(vm.rawData, loader.global, vm.data)(loader);
     data.submodules = vm.submodules.map(function(item) {
         // 可以通过loader共享数据
         return _sendRequrest(item, loader);
@@ -31,18 +31,21 @@ function _sendRequrest(vm, loader) {
 }
 
 /**
- * 获取数据获取器
- * @param {Object|function(Object):Object|function(Object):Promise} data
+ * 合并数据
+ * @param {..Object|function(Object):Object|function(Object):Promise} args
  * @return {function(Object):Promise}
  */
-function getDataer(data) {
+function mergeData() {
+    var args = [].slice.call(arguments);
     return function(loader) {
-        var global = adaptedData(loader.global || {})(loader),
-            local = adaptedData(data || {})(loader);
-        return Promise.all([global, local])
+        return Promise.all(
+                args.map(function(data) {
+                    return adaptedData(data || {})(loader);
+                })
+            )
             .then(function(datas) {
-                // extend global
-                return _.extend({}, datas[0] || {}, datas[1] || {});
+                datas.unshift({});
+                return _.extend.apply(_, datas);
             });
     };
 }

@@ -22,32 +22,20 @@ function findHtml(root, vm) {
 function findJs(root, vm) {
     root = root.replace(/\/?$/, '/');
 
-    var guessQ = null;
-    var code = utils.readFile(root + vm.name + '/main.js');
-    if (code) {
-        // 删除require
-        code = code.replace(/require\([^)]*\)/g, '{}');
-        guessQ = utils.load(code);
-    }
-
-    var resultQ = _.extend({
-        filters: {},
-        directives: {},
-        data: {}
-    }, guessQ || {});
-
-    var configCode = utils.readFile(root + vm.name + '/sync.js');
-    var configQ = configCode ? utils.load(configCode) : null;
-    if (configQ) {
-        // set config
-        _.extend(resultQ.filters, configQ.filters || {});
-        _.extend(resultQ.directives, configQ.directives || {});
-        resultQ.data = configQ.data || resultQ.data;
-    }
-
-    utils.wrapObjFuns(resultQ.filters);
-
-    return !configQ && !guessQ ? null : resultQ;
+    var rawFile = utils.readFile(root + vm.name + '/main.js'),
+        raw = rawFile 
+            && utils.load(rawFile.replace(/require\([^)]*\)/g, '{}')),
+        syncFile = utils.readFile(root + vm.name + '/sync.js'),
+        sync = syncFile ? utils.load(syncFile) : null;
+    return {
+        filters: utils.wrapFn(
+            _.extend(raw && raw.filters || {}, sync && sync.filters || {})
+        ),
+        directives: 
+            _.extend(raw && raw.directives || {}, sync && sync.filters || {}),
+        rawData: raw && raw.data || {},
+        data: sync && sync.data || {}
+    };
 }
 
 function findVm(root, vm) {
@@ -55,11 +43,9 @@ function findVm(root, vm) {
     var js = findJs(root, vm);
     if (html && js) {
         // todo directives
-        return {
-            raw: html,
-            filters: js.filters,
-            data: js.data
-        };
+        return _.extend(js, {
+            raw: html
+        });
     } else {
         return null;
     } 
